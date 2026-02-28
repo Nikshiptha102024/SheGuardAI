@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SheGuard AI</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>SheGuard AI</h1>
+    <p>Detect. Defend. Dignify.</p>
+
+    <input type="file" id="imageInput" accept="image/*">
+    <button onclick="analyzeImage()">Analyze Image</button>
+
+    <div id="result" class="hidden">
+        <h2>Analysis Result</h2>
+        <div class="progress-bar">
+            <div id="progress"></div>
+        </div>
+        <p id="probText"></p>
+        <h3 id="riskText"></h3>
+    </div>
+</div>
+
+<script>
+function analyzeImage() {
+    let fileInput = document.getElementById("imageInput");
+    let file = fileInput.files[0];
+
+    if (!file) {
+        alert("Please upload an image");
+        return;
+    }
+
+    let formData = new FormData();
+    formData.append("image", file);
+
+    fetch("/analyze", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById("result").classList.remove("hidden");
+
+        let probability = data.probability;
+
+        document.getElementById("progress").style.width = probability + "%";
+        document.getElementById("probText").innerText =
+            "Manipulation Probability: " + probability + "%";
+        document.getElementById("riskText").innerText =
+            "Risk Level: " + data.risk;
+    });
+}
+</script>
+
+</body>
+</html>
