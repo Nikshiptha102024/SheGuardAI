@@ -2,58 +2,73 @@
 <html>
 <head>
     <title>SheGuard AI</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        function showLoader() {
+            document.getElementById("loader").style.display = "block";
+        }
+
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = function(){
+                const output = document.getElementById('preview');
+                output.src = reader.result;
+                output.style.display = "block";
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    </script>
 </head>
 <body>
 
 <div class="container">
-    <h1>SheGuard AI</h1>
-    <p>Detect. Defend. Dignify.</p>
+    <h1>🛡 SheGuard AI</h1>
+    <p class="tagline">Hybrid Forensic Deepfake Detection Engine</p>
 
-    <input type="file" id="imageInput" accept="image/*">
-    <button onclick="analyzeImage()">Analyze Image</button>
+    <form method="POST" enctype="multipart/form-data" onsubmit="showLoader()">
+        <input type="file" name="image" required onchange="previewImage(event)">
+        <button type="submit">Scan Image</button>
+    </form>
 
-    <div id="result" class="hidden">
+    <img id="preview" class="preview"/>
+
+    <div id="loader" class="loader"></div>
+
+    {% if probability is not none %}
+    <div class="result-card">
+
         <h2>Analysis Result</h2>
-        <div class="progress-bar">
-            <div id="progress"></div>
+
+        <div class="progress-container">
+            <div class="progress-bar" style="width: {{ probability }}%"></div>
         </div>
-        <p id="probText"></p>
-        <h3 id="riskText"></h3>
+
+        <p class="percentage">{{ probability }}% Manipulation Risk</p>
+
+        <div class="risk {{ risk }}">
+            {{ risk }} RISK
+        </div>
+
+        <div class="breakdown">
+            <h3>Forensic Breakdown</h3>
+            <ul>
+                <li>✔ Frequency Domain Analysis</li>
+                <li>✔ Noise Pattern Irregularity</li>
+                <li>✔ Edge Artifact Detection</li>
+                <li>✔ Texture Entropy Mapping</li>
+                <li>✔ Compression Artifact Scan</li>
+                <li>✔ Metadata Integrity Check</li>
+            </ul>
+        </div>
+
     </div>
+    {% endif %}
+
+    <footer>
+        © 2026 SheGuard AI | Built for Digital Safety Hackathon
+    </footer>
+
 </div>
-
-<script>
-function analyzeImage() {
-    let fileInput = document.getElementById("imageInput");
-    let file = fileInput.files[0];
-
-    if (!file) {
-        alert("Please upload an image");
-        return;
-    }
-
-    let formData = new FormData();
-    formData.append("image", file);
-
-    fetch("/analyze", {
-        method: "POST",
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById("result").classList.remove("hidden");
-
-        let probability = data.probability;
-
-        document.getElementById("progress").style.width = probability + "%";
-        document.getElementById("probText").innerText =
-            "Manipulation Probability: " + probability + "%";
-        document.getElementById("riskText").innerText =
-            "Risk Level: " + data.risk;
-    });
-}
-</script>
 
 </body>
 </html>
